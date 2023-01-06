@@ -7,9 +7,9 @@
 #define FRONT 0 
 #define BACK 1
 #define FULL_PWM_CAPTURE 1000
-#define CAN_MOVE_SPEED 450
-#define MOVE_SPEED_L 2255
-#define MOVE_SPEED_R (MOVE_SPEED_L+50)
+#define CAN_MOVE_SPEED 700
+#define MOVE_SPEED_L 375
+#define MOVE_SPEED_R 375
 #define NONE_SPEED 0
 
 uint8_t mode;
@@ -46,6 +46,7 @@ int main(void)
   MX_TIM3_Init();
   MX_TIM4_Init();
   MX_USART2_UART_Init();
+  Motor_StartPwm();
 
   while (1)
   {
@@ -266,10 +267,10 @@ void Motor_StartPwm()
   HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_1);
   HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_2);
 
-  __HAL_TIM_SetCompare(&htim3, TIM_CHANNEL_1, NONE_SPEED);
-  __HAL_TIM_SetCompare(&htim3, TIM_CHANNEL_2, NONE_SPEED);
-  __HAL_TIM_SetCompare(&htim4, TIM_CHANNEL_1, NONE_SPEED);
-  __HAL_TIM_SetCompare(&htim4, TIM_CHANNEL_2, NONE_SPEED);
+  __HAL_TIM_SetCompare(&htim3, TIM_CHANNEL_1, FULL_PWM_CAPTURE);
+  __HAL_TIM_SetCompare(&htim3, TIM_CHANNEL_2, FULL_PWM_CAPTURE);
+  __HAL_TIM_SetCompare(&htim4, TIM_CHANNEL_1, FULL_PWM_CAPTURE);
+  __HAL_TIM_SetCompare(&htim4, TIM_CHANNEL_2, FULL_PWM_CAPTURE);
 }
 
 void ReadSensor()
