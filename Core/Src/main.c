@@ -1,5 +1,20 @@
 #include "main.h"
 
+#define BLACK 0
+#define WHITE 1
+#define REMOTE_CONTROL 0
+#define LINE_FOLOW 1
+#define FRONT 0 
+#define BACK 1
+#define FULL_PWM_CAPTURE 1000
+#define CAN_MOVE_SPEED 450
+#define MOVE_SPEED_L 2255
+#define MOVE_SPEED_R (MOVE_SPEED_L+50)
+#define NONE_SPEED 0
+
+uint8_t mode;
+uint8_t direction = FRONT;
+
 TIM_HandleTypeDef htim3;
 TIM_HandleTypeDef htim4;
 
@@ -10,6 +25,16 @@ static void MX_GPIO_Init(void);
 static void MX_TIM3_Init(void);
 static void MX_TIM4_Init(void);
 static void MX_USART2_UART_Init(void);
+
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+{
+	if(GPIO_Pin == GPIO_PIN_13)
+	{
+		mode = (mode == 0)? 1:0;
+	}
+  HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, mode^1);
+  HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_13);
+}
 
 int main(void)
 {
@@ -24,7 +49,14 @@ int main(void)
 
   while (1)
   {
-
+    if(mode==REMOTE_CONTROL){
+      StopMove();
+      RemoteControl();
+    }
+    else{
+      ReadSensor();
+    }
+      
   }
 
 }
@@ -223,6 +255,131 @@ static void MX_GPIO_Init(void)
   /* EXTI interrupt init*/
   HAL_NVIC_SetPriority(EXTI15_10_IRQn, 0, 0);
   HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
+
+  HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, mode^1);
+}
+
+void Motor_StartPwm()
+{
+  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
+  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_2);
+  HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_1);
+  HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_2);
+
+  __HAL_TIM_SetCompare(&htim3, TIM_CHANNEL_1, NONE_SPEED);
+  __HAL_TIM_SetCompare(&htim3, TIM_CHANNEL_2, NONE_SPEED);
+  __HAL_TIM_SetCompare(&htim4, TIM_CHANNEL_1, NONE_SPEED);
+  __HAL_TIM_SetCompare(&htim4, TIM_CHANNEL_2, NONE_SPEED);
+}
+
+void ReadSensor()
+{
+  GPIO_PinState left = HAL_GPIO_ReadPin(SENSOR_LEFT_GPIO_PORT, SENSOR_LEFT_GPIO_PIN);
+  GPIO_PinState mid = HAL_GPIO_ReadPin(SENSOR_MID_GPIO_PORT, SENSOR_MID_GPIO_PIN);
+  GPIO_PinState right = HAL_GPIO_ReadPin(SENSOR_RIGHT_GPIO_PORT, SENSOR_RIGHT_GPIO_PIN);
+
+  if (left == WHITE && mid == WHITE && right == WHITE)
+  {
+    Forward();
+    //Backward();
+  }
+  else if (left == WHITE && mid == WHITE && right == BLACK)
+  {
+    TurnRight();
+  }
+  else if (left == WHITE && mid == BLACK && right == BLACK)
+  {
+    TurnRight();
+  }
+  else if (left == WHITE && mid == BLACK && right == WHITE)
+  {
+    Forward();
+  }
+  else if (left == BLACK && mid == WHITE && right == WHITE)
+  {
+    TurnLeft();
+  }
+  else if (left == BLACK && mid == BLACK && right == WHITE)
+  {
+    TurnLeft();
+  }
+  else if (left == BLACK && mid == WHITE && right == BLACK)
+  {
+    Forward();
+  }
+  else
+  {
+    Forward();
+  }
+}
+
+void delay(uint32_t count)
+{
+  while(CAN_MOVE_SPEED - (count++));
+}
+
+void Forward()
+{
+  __HAL_TIM_SetCompare(&htim3, TIM_CHANNEL_1, CAN_MOVE_SPEED);
+  __HAL_TIM_SetCompare(&htim3, TIM_CHANNEL_2, NONE_SPEED);
+  __HAL_TIM_SetCompare(&htim4, TIM_CHANNEL_1, CAN_MOVE_SPEED);
+  __HAL_TIM_SetCompare(&htim4, TIM_CHANNEL_2, NONE_SPEED);
+  delay(MOVE_SPEED_L);
+  __HAL_TIM_SetCompare(&htim3, TIM_CHANNEL_1, MOVE_SPEED_L);
+  __HAL_TIM_SetCompare(&htim3, TIM_CHANNEL_2, NONE_SPEED);
+  __HAL_TIM_SetCompare(&htim4, TIM_CHANNEL_1, MOVE_SPEED_R);
+  __HAL_TIM_SetCompare(&htim4, TIM_CHANNEL_2, NONE_SPEED);
+}
+
+void Backward()
+{
+  __HAL_TIM_SetCompare(&htim3, TIM_CHANNEL_1, NONE_SPEED);
+  __HAL_TIM_SetCompare(&htim3, TIM_CHANNEL_2, CAN_MOVE_SPEED);
+  __HAL_TIM_SetCompare(&htim4, TIM_CHANNEL_1, NONE_SPEED);
+  __HAL_TIM_SetCompare(&htim4, TIM_CHANNEL_2, CAN_MOVE_SPEED);
+  delay(MOVE_SPEED_L);
+  __HAL_TIM_SetCompare(&htim3, TIM_CHANNEL_1, NONE_SPEED);
+  __HAL_TIM_SetCompare(&htim3, TIM_CHANNEL_2, MOVE_SPEED_L);
+  __HAL_TIM_SetCompare(&htim4, TIM_CHANNEL_1, NONE_SPEED);
+  __HAL_TIM_SetCompare(&htim4, TIM_CHANNEL_2, MOVE_SPEED_R);
+}
+
+void TurnRight()
+{
+  __HAL_TIM_SetCompare(&htim3, TIM_CHANNEL_1, CAN_MOVE_SPEED);
+  __HAL_TIM_SetCompare(&htim3, TIM_CHANNEL_2, NONE_SPEED);
+  __HAL_TIM_SetCompare(&htim4, TIM_CHANNEL_1, NONE_SPEED);
+  __HAL_TIM_SetCompare(&htim4, TIM_CHANNEL_2, NONE_SPEED);
+  delay(MOVE_SPEED_L);
+  __HAL_TIM_SetCompare(&htim3, TIM_CHANNEL_1, MOVE_SPEED_L);
+  __HAL_TIM_SetCompare(&htim3, TIM_CHANNEL_2, NONE_SPEED);
+  __HAL_TIM_SetCompare(&htim4, TIM_CHANNEL_1, NONE_SPEED);
+  __HAL_TIM_SetCompare(&htim4, TIM_CHANNEL_2, NONE_SPEED);
+}
+
+void TurnLeft()
+{
+  __HAL_TIM_SetCompare(&htim3, TIM_CHANNEL_1, NONE_SPEED);
+  __HAL_TIM_SetCompare(&htim3, TIM_CHANNEL_2, NONE_SPEED);
+  __HAL_TIM_SetCompare(&htim4, TIM_CHANNEL_1, CAN_MOVE_SPEED);
+  __HAL_TIM_SetCompare(&htim4, TIM_CHANNEL_2, NONE_SPEED);
+  delay(MOVE_SPEED_L);
+  __HAL_TIM_SetCompare(&htim3, TIM_CHANNEL_1, NONE_SPEED);
+  __HAL_TIM_SetCompare(&htim3, TIM_CHANNEL_2, NONE_SPEED);
+  __HAL_TIM_SetCompare(&htim4, TIM_CHANNEL_1, MOVE_SPEED_R);
+  __HAL_TIM_SetCompare(&htim4, TIM_CHANNEL_2, NONE_SPEED);
+}
+
+void StopMove()
+{
+  __HAL_TIM_SetCompare(&htim3, TIM_CHANNEL_1, NONE_SPEED);
+  __HAL_TIM_SetCompare(&htim3, TIM_CHANNEL_2, NONE_SPEED);
+  __HAL_TIM_SetCompare(&htim4, TIM_CHANNEL_1, NONE_SPEED);
+  __HAL_TIM_SetCompare(&htim4, TIM_CHANNEL_2, NONE_SPEED);
+}
+
+void RemoteControl()
+{
 
 }
 
