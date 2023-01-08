@@ -4,8 +4,11 @@
 #define WHITE 1
 #define REMOTE_CONTROL 0
 #define LINE_FOLOW 1
-#define FRONT 0 
-#define BACK 1
+#define STOP 0
+#define FRONT 1
+#define LEFT 2
+#define RIGHT 3
+#define BACK 4
 #define FULL_PWM_CAPTURE 1000
 #define CAN_MOVE_SPEED 700
 #define MOVE_SPEED_L 375
@@ -14,6 +17,8 @@
 
 uint8_t mode;
 uint8_t direction = FRONT;
+uint8_t Rx_data[1];
+uint8_t move_Status;
 
 TIM_HandleTypeDef htim3;
 TIM_HandleTypeDef htim4;
@@ -36,6 +41,36 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
   HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_13);
 }
 
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) 
+{
+  HAL_UART_Receive_IT(&huart2, Rx_data, 10); 
+  if(Rx_data[0] == 0x00)
+  {
+    move_Status = STOP;
+  }
+  else if(Rx_data[0] == 0x01)
+  {
+    move_Status = FRONT;
+  }
+  else if(Rx_data[0] == 0x02)
+  {
+     move_Status = LEFT;
+  }
+  else if(Rx_data[0] == 0x03)
+  {
+     move_Status = RIGHT;
+  }
+  else if(Rx_data[0] == 0x04)
+  {
+     move_Status = BACK;
+  }
+  else
+  {
+     move_Status = STOP;
+  }
+  HAL_UART_IRQHandler(&huart2);
+}
+
 int main(void)
 {
   HAL_Init();
@@ -51,7 +86,6 @@ int main(void)
   while (1)
   {
     if(mode==REMOTE_CONTROL){
-      StopMove();
       RemoteControl();
     }
     else{
@@ -381,7 +415,31 @@ void StopMove()
 
 void RemoteControl()
 {
-
+  if(move_Status == STOP)
+  {
+    StopMove();
+  }
+  else if(move_Status == FRONT)
+  {
+    Forward();
+  }
+  else if(move_Status == LEFT)
+  {
+    TurnLeft();
+  }
+  else if(move_Status == RIGHT)
+  {
+    TurnRight();
+  }
+  else if(move_Status == BACK)
+  {
+    Backward();
+  }
+  else
+  {
+    StopMove();
+  }
+  
 }
 
 void Error_Handler(void)
