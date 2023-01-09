@@ -42,8 +42,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 }
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) 
-{
-  HAL_UART_Receive_IT(&huart2, Rx_data, 10); 
+{ 
   if(Rx_data[0] == 0x00)
   {
     move_Status = STOP;
@@ -68,7 +67,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
   {
      move_Status = STOP;
   }
-  HAL_UART_IRQHandler(&huart2);
+  HAL_UART_Receive_IT(&huart2, Rx_data, 1);
 }
 
 int main(void)
@@ -82,6 +81,7 @@ int main(void)
   MX_TIM4_Init();
   MX_USART2_UART_Init();
   Motor_StartPwm();
+  HAL_UART_Receive_IT(&huart2, Rx_data, 1);
 
   while (1)
   {
@@ -245,7 +245,7 @@ static void MX_USART2_UART_Init(void)
   huart2.Init.WordLength = UART_WORDLENGTH_8B;
   huart2.Init.StopBits = UART_STOPBITS_1;
   huart2.Init.Parity = UART_PARITY_NONE;
-  huart2.Init.Mode = UART_MODE_TX_RX;
+  huart2.Init.Mode = UART_MODE_RX;
   huart2.Init.HwFlowCtl = UART_HWCONTROL_NONE;
   huart2.Init.OverSampling = UART_OVERSAMPLING_16;
   if (HAL_UART_Init(&huart2) != HAL_OK)
