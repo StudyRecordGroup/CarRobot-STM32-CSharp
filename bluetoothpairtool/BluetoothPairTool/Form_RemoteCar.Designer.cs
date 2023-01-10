@@ -61,14 +61,14 @@ namespace BluetoothPairTool
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 120F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(524, 426);
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(524, 578);
             this.tableLayoutPanel1.TabIndex = 1;
             // 
             // label2
             // 
             this.label2.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(3, 312);
+            this.label2.Location = new System.Drawing.Point(3, 388);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(49, 12);
             this.label2.TabIndex = 1;
@@ -83,14 +83,14 @@ namespace BluetoothPairTool
             this.listBox1.ItemHeight = 14;
             this.listBox1.Location = new System.Drawing.Point(177, 243);
             this.listBox1.Name = "listBox1";
-            this.listBox1.Size = new System.Drawing.Size(344, 151);
+            this.listBox1.Size = new System.Drawing.Size(344, 303);
             this.listBox1.TabIndex = 4;
             // 
             // button_Close
             // 
             this.button_Close.DialogResult = System.Windows.Forms.DialogResult.OK;
             this.button_Close.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.button_Close.Location = new System.Drawing.Point(351, 400);
+            this.button_Close.Location = new System.Drawing.Point(351, 552);
             this.button_Close.Name = "button_Close";
             this.button_Close.Size = new System.Drawing.Size(170, 23);
             this.button_Close.TabIndex = 1;
@@ -106,7 +106,7 @@ namespace BluetoothPairTool
             this.button_Back.Size = new System.Drawing.Size(168, 114);
             this.button_Back.TabIndex = 2;
             this.button_Back.TabStop = false;
-            this.button_Back.Text = "🔽";
+            this.button_Back.Text = "S";
             this.button_Back.UseVisualStyleBackColor = true;
             // 
             // button_Front
@@ -118,7 +118,7 @@ namespace BluetoothPairTool
             this.button_Front.Size = new System.Drawing.Size(168, 114);
             this.button_Front.TabIndex = 5;
             this.button_Front.TabStop = false;
-            this.button_Front.Text = "🔼";
+            this.button_Front.Text = "W";
             this.button_Front.UseVisualStyleBackColor = true;
             // 
             // button_Left
@@ -130,7 +130,7 @@ namespace BluetoothPairTool
             this.button_Left.Size = new System.Drawing.Size(168, 114);
             this.button_Left.TabIndex = 6;
             this.button_Left.TabStop = false;
-            this.button_Left.Text = "◀";
+            this.button_Left.Text = "A";
             this.button_Left.UseVisualStyleBackColor = true;
             // 
             // button_Right
@@ -142,14 +142,14 @@ namespace BluetoothPairTool
             this.button_Right.Size = new System.Drawing.Size(170, 114);
             this.button_Right.TabIndex = 7;
             this.button_Right.TabStop = false;
-            this.button_Right.Text = "▶";
+            this.button_Right.Text = "D";
             this.button_Right.UseVisualStyleBackColor = true;
             // 
             // Form_RemoteCar
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(524, 426);
+            this.ClientSize = new System.Drawing.Size(524, 578);
             this.Controls.Add(this.tableLayoutPanel1);
             this.KeyPreview = true;
             this.Name = "Form_RemoteCar";

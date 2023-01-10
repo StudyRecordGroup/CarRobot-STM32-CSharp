@@ -116,10 +116,10 @@ namespace BluetoothPairTool
 
         private void Form_RemoteCar_PreviewKeyDown(object sender, PreviewKeyDownEventArgs e)
         {
-            if (e.KeyCode == Keys.W || e.KeyCode == Keys.Up ||
-                e.KeyCode == Keys.A || e.KeyCode == Keys.Left ||
-                e.KeyCode == Keys.D || e.KeyCode == Keys.Right ||
-                e.KeyCode == Keys.S || e.KeyCode == Keys.Down)
+            if (e.KeyCode == Keys.W ||
+                e.KeyCode == Keys.A ||
+                e.KeyCode == Keys.D ||
+                e.KeyCode == Keys.S )
             {
                 e.IsInputKey = true;
             }
@@ -128,25 +128,25 @@ namespace BluetoothPairTool
         private async void Form_RemoteCar_KeyDown(object sender, KeyEventArgs e)
         {
             if (pressKey != DirKey.None) return;
-            if (e.KeyCode == Keys.W || e.KeyCode == Keys.Up)
+            if (e.KeyCode == Keys.W)
             {
                 pressKey = DirKey.Up;
                 button_Front.BackColor = Color.LawnGreen;
                 await sendCmd((byte)MoveCmd.Front);
             }
-            if (e.KeyCode == Keys.A || e.KeyCode == Keys.Left)
+            if (e.KeyCode == Keys.A)
             {
                 pressKey = DirKey.Left;
                 button_Left.BackColor = Color.LawnGreen;
                 await sendCmd((byte)MoveCmd.Left);
             }
-            if (e.KeyCode == Keys.D || e.KeyCode == Keys.Right)
+            if (e.KeyCode == Keys.D)
             {
                 pressKey = DirKey.Right;
                 button_Right.BackColor = Color.LawnGreen;
                 await sendCmd((byte)MoveCmd.Right);
             }
-            if (e.KeyCode == Keys.S || e.KeyCode == Keys.Down)
+            if (e.KeyCode == Keys.S)
             {
                 pressKey = DirKey.Down;
                 button_Back.BackColor = Color.LawnGreen;
@@ -156,22 +156,22 @@ namespace BluetoothPairTool
 
         private async void Form_RemoteCar_KeyUp(object sender, KeyEventArgs e)
         {
-            if (e.KeyCode == Keys.W || e.KeyCode == Keys.Up)
+            if (e.KeyCode == Keys.W)
             {
                 await sendCmd((byte)MoveCmd.Stop);
                 button_Front.BackColor = Color.Transparent;
             }
-            if (e.KeyCode == Keys.A || e.KeyCode == Keys.Left)
+            if (e.KeyCode == Keys.A)
             {
                 await sendCmd((byte)MoveCmd.Stop);
                 button_Left.BackColor = Color.Transparent;
             }
-            if (e.KeyCode == Keys.D || e.KeyCode == Keys.Right)
+            if (e.KeyCode == Keys.D)
             {
                 await sendCmd((byte)MoveCmd.Stop);
                 button_Right.BackColor = Color.Transparent;
             }
-            if (e.KeyCode == Keys.S || e.KeyCode == Keys.Down)
+            if (e.KeyCode == Keys.S)
             {
                 await sendCmd((byte)MoveCmd.Stop);
                 button_Back.BackColor = Color.Transparent;
