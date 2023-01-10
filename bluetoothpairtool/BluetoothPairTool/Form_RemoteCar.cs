@@ -156,27 +156,30 @@ namespace BluetoothPairTool
 
         private async void Form_RemoteCar_KeyUp(object sender, KeyEventArgs e)
         {
-            if (e.KeyCode == Keys.W)
+            if (e.KeyCode == Keys.W && pressKey == DirKey.Up)
             {
                 await sendCmd((byte)MoveCmd.Stop);
                 button_Front.BackColor = Color.Transparent;
+                pressKey = DirKey.None;
             }
-            if (e.KeyCode == Keys.A)
+            if (e.KeyCode == Keys.A && pressKey == DirKey.Left)
             {
                 await sendCmd((byte)MoveCmd.Stop);
                 button_Left.BackColor = Color.Transparent;
+                pressKey = DirKey.None;
             }
-            if (e.KeyCode == Keys.D)
+            if (e.KeyCode == Keys.D && pressKey == DirKey.Right)
             {
                 await sendCmd((byte)MoveCmd.Stop);
                 button_Right.BackColor = Color.Transparent;
+                pressKey = DirKey.None;
             }
-            if (e.KeyCode == Keys.S)
+            if (e.KeyCode == Keys.S && pressKey == DirKey.Down)
             {
                 await sendCmd((byte)MoveCmd.Stop);
                 button_Back.BackColor = Color.Transparent;
+                pressKey = DirKey.None;
             }
-            pressKey = DirKey.None;
         }
     }
 }
