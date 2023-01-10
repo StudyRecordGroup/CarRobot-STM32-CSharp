@@ -10,9 +10,9 @@
 #define RIGHT 3
 #define BACK 4
 #define FULL_PWM_CAPTURE 1000
-#define CAN_MOVE_SPEED 700
-#define MOVE_SPEED_L 375
-#define MOVE_SPEED_R 375
+#define CAN_MOVE_SPEED 550
+#define MOVE_SPEED_L 275
+#define MOVE_SPEED_R 250
 #define NONE_SPEED 0
 
 uint8_t mode;
@@ -24,12 +24,13 @@ TIM_HandleTypeDef htim3;
 TIM_HandleTypeDef htim4;
 
 UART_HandleTypeDef huart2;
+UART_HandleTypeDef huart6;
 
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_TIM3_Init(void);
 static void MX_TIM4_Init(void);
-static void MX_USART2_UART_Init(void);
+static void MX_USART6_UART_Init(void);
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
@@ -63,11 +64,16 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
   {
      move_Status = BACK;
   }
+  else if(Rx_data[0] == 0x05)
+  {
+    move_Status = STOP;
+    mode = (mode == 0)? 1:0;
+  }
   else
   {
      move_Status = STOP;
   }
-  HAL_UART_Receive_IT(&huart2, Rx_data, 1);
+  HAL_UART_Receive_IT(&huart6, Rx_data, 1);
 }
 
 int main(void)
@@ -79,10 +85,9 @@ int main(void)
   MX_GPIO_Init();
   MX_TIM3_Init();
   MX_TIM4_Init();
-  MX_USART2_UART_Init();
+  MX_USART6_UART_Init();
   Motor_StartPwm();
-  HAL_UART_Receive_IT(&huart2, Rx_data, 1);
-
+  HAL_UART_Receive_IT(&huart6, Rx_data, 1);
   while (1)
   {
     if(mode==REMOTE_CONTROL){
@@ -237,18 +242,17 @@ static void MX_TIM4_Init(void)
 
 }
 
-static void MX_USART2_UART_Init(void)
+static void MX_USART6_UART_Init(void)
 {
-
-  huart2.Instance = USART2;
-  huart2.Init.BaudRate = 115200;
-  huart2.Init.WordLength = UART_WORDLENGTH_8B;
-  huart2.Init.StopBits = UART_STOPBITS_1;
-  huart2.Init.Parity = UART_PARITY_NONE;
-  huart2.Init.Mode = UART_MODE_RX;
-  huart2.Init.HwFlowCtl = UART_HWCONTROL_NONE;
-  huart2.Init.OverSampling = UART_OVERSAMPLING_16;
-  if (HAL_UART_Init(&huart2) != HAL_OK)
+  huart6.Instance = USART6;
+  huart6.Init.BaudRate = 9600;
+  huart6.Init.WordLength = UART_WORDLENGTH_8B;
+  huart6.Init.StopBits = UART_STOPBITS_1;
+  huart6.Init.Parity = UART_PARITY_NONE;
+  huart6.Init.Mode = UART_MODE_TX_RX;
+  huart6.Init.HwFlowCtl = UART_HWCONTROL_NONE;
+  huart6.Init.OverSampling = UART_OVERSAMPLING_16;
+  if (HAL_UART_Init(&huart6) != HAL_OK)
   {
     Error_Handler();
   }
@@ -315,8 +319,8 @@ void ReadSensor()
 
   if (left == WHITE && mid == WHITE && right == WHITE)
   {
-    Forward();
-    //Backward();
+    //Forward();
+    Backward();
   }
   else if (left == WHITE && mid == WHITE && right == BLACK)
   {

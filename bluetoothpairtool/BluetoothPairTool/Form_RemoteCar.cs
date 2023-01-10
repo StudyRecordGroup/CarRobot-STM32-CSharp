@@ -181,5 +181,14 @@ namespace BluetoothPairTool
                 pressKey = DirKey.None;
             }
         }
+
+        private void button_ChangeMode_Click(object sender, EventArgs e)
+        {
+            byte[] cmds = new byte[] { 0x05 };
+            string msg = $">> {BitConverter.ToString(cmds).Replace("-", " ")}";
+            Debug.WriteLine(msg);
+            UpdateResponse(msg);
+            serialPort.Write(cmds, 0, 1);
+        }
     }
 }
