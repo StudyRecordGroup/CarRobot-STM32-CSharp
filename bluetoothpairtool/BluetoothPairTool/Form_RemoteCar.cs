@@ -20,6 +20,16 @@ namespace BluetoothPairTool
 
     public partial class Form_RemoteCar : Form
     {
+        enum DirKey
+        {
+            None,
+            Up,
+            Left,
+            Right,
+            Down,
+        }
+
+        DirKey pressKey;
         SerialPort serialPort;
         CancellationTokenSource m_cancel = new CancellationTokenSource();
 
@@ -36,6 +46,7 @@ namespace BluetoothPairTool
         {
             InitializeComponent();
             serialPort = socket;
+            pressKey = DirKey.None;
         }
 
         public static byte[] StringToByteArray(string hex)
@@ -59,14 +70,7 @@ namespace BluetoothPairTool
             //ReceiveStringLoop(chatReader);
             BackgroundWorker worker = new BackgroundWorker();
             worker.RunWorkerAsync(serialPort);
-            button_Front.KeyDown += button_KeyDown;
-            button_Back.KeyDown += button_KeyDown;
-            button_Left.KeyDown += button_KeyDown;
-            button_Right.KeyDown += button_KeyDown;
-            button_Front.KeyUp += button_KeyUp;
-            button_Back.KeyUp += button_KeyUp;
-            button_Left.KeyUp += button_KeyUp;
-            button_Right.KeyUp += button_KeyUp;
+            this.Focus();
         }
 
         private delegate void ShowMessage(string sMessage);
@@ -90,36 +94,14 @@ namespace BluetoothPairTool
             serialPort.Dispose();
         }
 
-        private async void button_KeyDown(object sender, KeyEventArgs e)
-        {
-            if (e.KeyCode == Keys.W || e.KeyCode == Keys.Up)
-                await sendCmd((byte)MoveCmd.Front);
-            if (e.KeyCode == Keys.A || e.KeyCode == Keys.Left)
-                await sendCmd((byte)MoveCmd.Left);
-            if (e.KeyCode == Keys.D || e.KeyCode == Keys.Right)
-                await sendCmd((byte)MoveCmd.Right);
-            if (e.KeyCode == Keys.S || e.KeyCode == Keys.Down)
-                await sendCmd((byte)MoveCmd.Back);
-        }
-
-        private async void button_KeyUp(object sender, KeyEventArgs e)
-        {
-            if (e.KeyCode == Keys.W || e.KeyCode == Keys.Up)
-                await sendCmd((byte)MoveCmd.Stop);
-            if (e.KeyCode == Keys.A || e.KeyCode == Keys.Left)
-                await sendCmd((byte)MoveCmd.Stop);
-            if (e.KeyCode == Keys.D || e.KeyCode == Keys.Right)
-                await sendCmd((byte)MoveCmd.Stop);
-            if (e.KeyCode == Keys.S || e.KeyCode == Keys.Down)
-                await sendCmd((byte)MoveCmd.Stop);
-        }
-
         private async Task sendCmd(byte cmd)
         {
             try
             {
                 byte[] cmds = new byte[] { cmd };
-                Debug.WriteLine($">> { BitConverter.ToString(cmds).Replace("-", " ")}");
+                string msg = $">> { BitConverter.ToString(cmds).Replace("-", " ")}";
+                Debug.WriteLine(msg);
+                UpdateResponse(msg);
                 serialPort.Write(cmds, 0, 1);
             }
             catch (Exception ex)
@@ -130,6 +112,71 @@ namespace BluetoothPairTool
             {
 
             }
+        }
+
+        private void Form_RemoteCar_PreviewKeyDown(object sender, PreviewKeyDownEventArgs e)
+        {
+            if (e.KeyCode == Keys.W || e.KeyCode == Keys.Up ||
+                e.KeyCode == Keys.A || e.KeyCode == Keys.Left ||
+                e.KeyCode == Keys.D || e.KeyCode == Keys.Right ||
+                e.KeyCode == Keys.S || e.KeyCode == Keys.Down)
+            {
+                e.IsInputKey = true;
+            }
+        }
+
+        private async void Form_RemoteCar_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (pressKey != DirKey.None) return;
+            if (e.KeyCode == Keys.W || e.KeyCode == Keys.Up)
+            {
+                pressKey = DirKey.Up;
+                button_Front.BackColor = Color.LawnGreen;
+                await sendCmd((byte)MoveCmd.Front);
+            }
+            if (e.KeyCode == Keys.A || e.KeyCode == Keys.Left)
+            {
+                pressKey = DirKey.Left;
+                button_Left.BackColor = Color.LawnGreen;
+                await sendCmd((byte)MoveCmd.Left);
+            }
+            if (e.KeyCode == Keys.D || e.KeyCode == Keys.Right)
+            {
+                pressKey = DirKey.Right;
+                button_Right.BackColor = Color.LawnGreen;
+                await sendCmd((byte)MoveCmd.Right);
+            }
+            if (e.KeyCode == Keys.S || e.KeyCode == Keys.Down)
+            {
+                pressKey = DirKey.Down;
+                button_Back.BackColor = Color.LawnGreen;
+                await sendCmd((byte)MoveCmd.Back);
+            }
+        }
+
+        private async void Form_RemoteCar_KeyUp(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.W || e.KeyCode == Keys.Up)
+            {
+                await sendCmd((byte)MoveCmd.Stop);
+                button_Front.BackColor = Color.Transparent;
+            }
+            if (e.KeyCode == Keys.A || e.KeyCode == Keys.Left)
+            {
+                await sendCmd((byte)MoveCmd.Stop);
+                button_Left.BackColor = Color.Transparent;
+            }
+            if (e.KeyCode == Keys.D || e.KeyCode == Keys.Right)
+            {
+                await sendCmd((byte)MoveCmd.Stop);
+                button_Right.BackColor = Color.Transparent;
+            }
+            if (e.KeyCode == Keys.S || e.KeyCode == Keys.Down)
+            {
+                await sendCmd((byte)MoveCmd.Stop);
+                button_Back.BackColor = Color.Transparent;
+            }
+            pressKey = DirKey.None;
         }
     }
 }

@@ -105,6 +105,7 @@ namespace BluetoothPairTool
             this.button_Back.Name = "button_Back";
             this.button_Back.Size = new System.Drawing.Size(168, 114);
             this.button_Back.TabIndex = 2;
+            this.button_Back.TabStop = false;
             this.button_Back.Text = "🔽";
             this.button_Back.UseVisualStyleBackColor = true;
             // 
@@ -116,6 +117,7 @@ namespace BluetoothPairTool
             this.button_Front.Name = "button_Front";
             this.button_Front.Size = new System.Drawing.Size(168, 114);
             this.button_Front.TabIndex = 5;
+            this.button_Front.TabStop = false;
             this.button_Front.Text = "🔼";
             this.button_Front.UseVisualStyleBackColor = true;
             // 
@@ -127,6 +129,7 @@ namespace BluetoothPairTool
             this.button_Left.Name = "button_Left";
             this.button_Left.Size = new System.Drawing.Size(168, 114);
             this.button_Left.TabIndex = 6;
+            this.button_Left.TabStop = false;
             this.button_Left.Text = "◀";
             this.button_Left.UseVisualStyleBackColor = true;
             // 
@@ -138,6 +141,7 @@ namespace BluetoothPairTool
             this.button_Right.Name = "button_Right";
             this.button_Right.Size = new System.Drawing.Size(170, 114);
             this.button_Right.TabIndex = 7;
+            this.button_Right.TabStop = false;
             this.button_Right.Text = "▶";
             this.button_Right.UseVisualStyleBackColor = true;
             // 
@@ -147,10 +151,14 @@ namespace BluetoothPairTool
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(524, 426);
             this.Controls.Add(this.tableLayoutPanel1);
+            this.KeyPreview = true;
             this.Name = "Form_RemoteCar";
             this.Text = "Form_RemoteCar";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form_RemoteCar_FormClosing);
             this.Load += new System.EventHandler(this.Form_RemoteCar_Load);
+            this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.Form_RemoteCar_KeyDown);
+            this.KeyUp += new System.Windows.Forms.KeyEventHandler(this.Form_RemoteCar_KeyUp);
+            this.PreviewKeyDown += new System.Windows.Forms.PreviewKeyDownEventHandler(this.Form_RemoteCar_PreviewKeyDown);
             this.tableLayoutPanel1.ResumeLayout(false);
             this.tableLayoutPanel1.PerformLayout();
             this.ResumeLayout(false);
