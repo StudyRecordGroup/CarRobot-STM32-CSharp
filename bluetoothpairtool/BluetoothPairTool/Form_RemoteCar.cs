@@ -13,6 +13,7 @@ using Windows.Networking.Sockets;
 using Windows.Storage.Streams;
 using Newtonsoft.Json;
 using System.IO;
+using System.IO.Ports;
 
 namespace BluetoothPairTool
 {
@@ -20,8 +21,7 @@ namespace BluetoothPairTool
     public partial class Form_RemoteCar : Form
     {
         StreamSocket m_socket;
-        DataWriter m_chatWriter;
-        DataReader m_chatReader;
+        SerialPort serialPort;
         CancellationTokenSource m_cancel = new CancellationTokenSource();
 
         enum MoveCmd
@@ -33,10 +33,10 @@ namespace BluetoothPairTool
             Back
         }
 
-        public Form_RemoteCar(StreamSocket socket)
+        public Form_RemoteCar(SerialPort socket)
         {
             InitializeComponent();
-            m_socket = socket;
+            serialPort = socket;
         }
 
         public static byte[] StringToByteArray(string hex)
@@ -56,12 +56,10 @@ namespace BluetoothPairTool
 
         private void Form_RemoteCar_Load(object sender, EventArgs e)
         {
-            m_chatReader = new DataReader(m_socket.InputStream);
-            m_chatWriter = new DataWriter(m_socket.OutputStream);
+
             //ReceiveStringLoop(chatReader);
             BackgroundWorker worker = new BackgroundWorker();
-            worker.DoWork += Worker_DoWork;
-            worker.RunWorkerAsync(m_chatReader);
+            worker.RunWorkerAsync(serialPort);
             button_Front.KeyDown += button_KeyDown;
             button_Back.KeyDown += button_KeyDown;
             button_Left.KeyDown += button_KeyDown;
@@ -70,37 +68,6 @@ namespace BluetoothPairTool
             button_Back.KeyUp += button_KeyUp;
             button_Left.KeyUp += button_KeyUp;
             button_Right.KeyUp += button_KeyUp;
-        }
-
-        private async void Worker_DoWork(object sender, DoWorkEventArgs e)
-        {
-            var worker = sender as BackgroundWorker;
-            var chatReader = e.Argument as DataReader;
-            byte[] data = new byte[1];
-            try
-            {
-                while (!m_cancel.IsCancellationRequested)
-                {
-                    uint size = await chatReader.LoadAsync(1);
-                    if (size != 1)
-                    {
-                        Debug.WriteLine("Remote device terminated connecton");
-                        return;
-                    }
-                    chatReader.ReadBytes(data);
-                    var rsp = $"{BitConverter.ToString(data).Replace('-', ' ')} ";
-                    Debug.WriteLine($"<< {rsp}");
-                    UpdateResponse(rsp);
-                }
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine(ex.Message);
-            }
-            finally
-            {
-                Debug.WriteLine("Worker terminated");
-            }
         }
 
         private delegate void ShowMessage(string sMessage);
@@ -120,8 +87,8 @@ namespace BluetoothPairTool
         private void Form_RemoteCar_FormClosing(object sender, FormClosingEventArgs e)
         {
             m_cancel.Cancel();
-            m_chatWriter.Dispose();
-            m_chatReader.Dispose();
+            serialPort.Close();
+            serialPort.Dispose();
         }
 
         private async void button_KeyDown(object sender, KeyEventArgs e)
@@ -152,9 +119,9 @@ namespace BluetoothPairTool
         {
             try
             {
-                Debug.WriteLine($">> { cmd.ToString("x")}");
-                m_chatWriter.WriteByte(cmd);
-                await m_chatWriter.StoreAsync();
+                byte[] cmds = new byte[] { cmd };
+                Debug.WriteLine($">> { BitConverter.ToString(cmds).Replace("-", " ")}");
+                serialPort.Write(cmds, 0, 1);
             }
             catch (Exception ex)
             {
