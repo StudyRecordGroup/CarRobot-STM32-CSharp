@@ -18,7 +18,7 @@ namespace BluetoothPairTool
             { "None", 0},
             { "Odd", 1},
             { "Even", 2},
-            { "Mark", 2},
+            { "Mark", 3},
         };
 
         Dictionary<string, int> StopBit = new Dictionary<string, int>()
@@ -46,6 +46,7 @@ namespace BluetoothPairTool
             comboBox_StopBit.DataSource = new BindingSource(StopBit, null);
             comboBox_StopBit.DisplayMember = "Key";
             comboBox_StopBit.ValueMember = "Value";
+            comboBox_StopBit.SelectedIndex = 1;
         }
 
         private void button_refresh_Click(object sender, EventArgs e)

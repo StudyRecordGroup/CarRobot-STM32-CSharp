@@ -20,7 +20,6 @@ namespace BluetoothPairTool
 
     public partial class Form_RemoteCar : Form
     {
-        StreamSocket m_socket;
         SerialPort serialPort;
         CancellationTokenSource m_cancel = new CancellationTokenSource();
 
