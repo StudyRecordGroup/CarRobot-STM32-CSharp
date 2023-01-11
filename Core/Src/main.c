@@ -9,14 +9,12 @@
 #define LEFT 2
 #define RIGHT 3
 #define BACK 4
-#define FULL_PWM_CAPTURE 1000
-#define CAN_MOVE_SPEED 550
+#define FULL_PWM_CAPTURE 999
 #define MOVE_SPEED_L 275
 #define MOVE_SPEED_R 250
 #define NONE_SPEED 0
 
 uint8_t mode;
-uint8_t direction = FRONT;
 uint8_t Rx_data[1];
 uint8_t move_Status;
 
@@ -36,7 +34,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
 	if(GPIO_Pin == GPIO_PIN_13)
 	{
-		mode = (mode == 0)? 1:0;
+		mode^=1;
 	}
   HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, mode^1);
   HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_13);
@@ -67,7 +65,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
   else if(Rx_data[0] == 0x05)
   {
     move_Status = STOP;
-    mode = (mode == 0)? 1:0;
+    mode^=1;
   }
   else
   {
@@ -79,13 +77,12 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 int main(void)
 {
   HAL_Init();
-
   SystemClock_Config();
-
   MX_GPIO_Init();
   MX_TIM3_Init();
   MX_TIM4_Init();
   MX_USART6_UART_Init();
+
   Motor_StartPwm();
   HAL_UART_Receive_IT(&huart6, Rx_data, 1);
   while (1)
@@ -305,10 +302,10 @@ void Motor_StartPwm()
   HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_1);
   HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_2);
 
-  __HAL_TIM_SetCompare(&htim3, TIM_CHANNEL_1, FULL_PWM_CAPTURE);
-  __HAL_TIM_SetCompare(&htim3, TIM_CHANNEL_2, FULL_PWM_CAPTURE);
-  __HAL_TIM_SetCompare(&htim4, TIM_CHANNEL_1, FULL_PWM_CAPTURE);
-  __HAL_TIM_SetCompare(&htim4, TIM_CHANNEL_2, FULL_PWM_CAPTURE);
+  __HAL_TIM_SetCompare(&htim3, TIM_CHANNEL_1, NONE_SPEED);
+  __HAL_TIM_SetCompare(&htim3, TIM_CHANNEL_2, NONE_SPEED);
+  __HAL_TIM_SetCompare(&htim4, TIM_CHANNEL_1, NONE_SPEED);
+  __HAL_TIM_SetCompare(&htim4, TIM_CHANNEL_2, NONE_SPEED);
 }
 
 void ReadSensor()
@@ -319,7 +316,6 @@ void ReadSensor()
 
   if (left == WHITE && mid == WHITE && right == WHITE)
   {
-    //Forward();
     Backward();
   }
   else if (left == WHITE && mid == WHITE && right == BLACK)
@@ -352,18 +348,8 @@ void ReadSensor()
   }
 }
 
-void delay(uint32_t count)
-{
-  while(CAN_MOVE_SPEED - (count++));
-}
-
 void Forward()
 {
-  __HAL_TIM_SetCompare(&htim3, TIM_CHANNEL_1, CAN_MOVE_SPEED);
-  __HAL_TIM_SetCompare(&htim3, TIM_CHANNEL_2, NONE_SPEED);
-  __HAL_TIM_SetCompare(&htim4, TIM_CHANNEL_1, CAN_MOVE_SPEED);
-  __HAL_TIM_SetCompare(&htim4, TIM_CHANNEL_2, NONE_SPEED);
-  delay(MOVE_SPEED_L);
   __HAL_TIM_SetCompare(&htim3, TIM_CHANNEL_1, MOVE_SPEED_L);
   __HAL_TIM_SetCompare(&htim3, TIM_CHANNEL_2, NONE_SPEED);
   __HAL_TIM_SetCompare(&htim4, TIM_CHANNEL_1, MOVE_SPEED_R);
@@ -373,11 +359,6 @@ void Forward()
 void Backward()
 {
   __HAL_TIM_SetCompare(&htim3, TIM_CHANNEL_1, NONE_SPEED);
-  __HAL_TIM_SetCompare(&htim3, TIM_CHANNEL_2, CAN_MOVE_SPEED);
-  __HAL_TIM_SetCompare(&htim4, TIM_CHANNEL_1, NONE_SPEED);
-  __HAL_TIM_SetCompare(&htim4, TIM_CHANNEL_2, CAN_MOVE_SPEED);
-  delay(MOVE_SPEED_L);
-  __HAL_TIM_SetCompare(&htim3, TIM_CHANNEL_1, NONE_SPEED);
   __HAL_TIM_SetCompare(&htim3, TIM_CHANNEL_2, MOVE_SPEED_L);
   __HAL_TIM_SetCompare(&htim4, TIM_CHANNEL_1, NONE_SPEED);
   __HAL_TIM_SetCompare(&htim4, TIM_CHANNEL_2, MOVE_SPEED_R);
@@ -385,11 +366,6 @@ void Backward()
 
 void TurnRight()
 {
-  __HAL_TIM_SetCompare(&htim3, TIM_CHANNEL_1, CAN_MOVE_SPEED);
-  __HAL_TIM_SetCompare(&htim3, TIM_CHANNEL_2, NONE_SPEED);
-  __HAL_TIM_SetCompare(&htim4, TIM_CHANNEL_1, NONE_SPEED);
-  __HAL_TIM_SetCompare(&htim4, TIM_CHANNEL_2, NONE_SPEED);
-  delay(MOVE_SPEED_L);
   __HAL_TIM_SetCompare(&htim3, TIM_CHANNEL_1, MOVE_SPEED_L);
   __HAL_TIM_SetCompare(&htim3, TIM_CHANNEL_2, NONE_SPEED);
   __HAL_TIM_SetCompare(&htim4, TIM_CHANNEL_1, NONE_SPEED);
@@ -398,11 +374,6 @@ void TurnRight()
 
 void TurnLeft()
 {
-  __HAL_TIM_SetCompare(&htim3, TIM_CHANNEL_1, NONE_SPEED);
-  __HAL_TIM_SetCompare(&htim3, TIM_CHANNEL_2, NONE_SPEED);
-  __HAL_TIM_SetCompare(&htim4, TIM_CHANNEL_1, CAN_MOVE_SPEED);
-  __HAL_TIM_SetCompare(&htim4, TIM_CHANNEL_2, NONE_SPEED);
-  delay(MOVE_SPEED_L);
   __HAL_TIM_SetCompare(&htim3, TIM_CHANNEL_1, NONE_SPEED);
   __HAL_TIM_SetCompare(&htim3, TIM_CHANNEL_2, NONE_SPEED);
   __HAL_TIM_SetCompare(&htim4, TIM_CHANNEL_1, MOVE_SPEED_R);

@@ -16,10 +16,6 @@ extern "C" {
 #define USART_RX_GPIO_Port GPIOA
 #define LD2_Pin GPIO_PIN_5
 #define LD2_GPIO_Port GPIOA
-#define TMS_Pin GPIO_PIN_13
-#define TMS_GPIO_Port GPIOA
-#define TCK_Pin GPIO_PIN_14
-#define TCK_GPIO_Port GPIOA
 #define SENSOR_ALL_GPIO_PORT GPIOB
 #define SENSOR_LEFT_GPIO_PORT GPIOB
 #define SENSOR_MID_GPIO_PORT GPIOB
